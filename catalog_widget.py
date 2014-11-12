@@ -37,7 +37,7 @@ class Collection(QTreeWidgetItem):
 
 
 class BeadType(QTreeWidgetItem):
-    def __init__(self, name, brush=Qt.red):
+    def __init__(self, name, brush):
         super(BeadType, self).__init__(1001)
         self.setData(0, Qt.DisplayRole, QVariant(name))
         self.set_pixmap(brush)
@@ -55,9 +55,11 @@ class BeadType(QTreeWidgetItem):
         # paint the icon...
         bead_painter.begin(self.pixmap)
 
+
         bead_painter.setPen(QColor(170, 170, 168))
         bead_painter.setBrush(brush)
-        bead_painter.drawRoundedRect(0, 0, 28, 40, 10, 10)
+        # TODO: shape this nicer.
+        bead_painter.drawRoundedRect(0, 0, 27, 39, 5, 5)
 
         bead_painter.end()
 

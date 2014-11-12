@@ -13,12 +13,12 @@ from design_widget import *
 
 
 class NewWizard(QWizard):
-    def __init__(self, mdi_area, parent=None):
+    def __init__(self, mw, parent=None):
         super(NewWizard, self).__init__(parent)
         self.addPage(DesignSpecsPage())
 
         self.setWindowTitle('Creating a New Design')
-        self.mdi_area = mdi_area # just a handle so the new design can be
+        self.mw = mw # just a handle so the new design can be
         # added to the main window...
 
 
@@ -30,9 +30,9 @@ class NewWizard(QWizard):
         height = self.field('height')
 
         # Creating the new design and adding it to the main window
-        new_design = DesignScene(name=name, track_width=track_width, tracks=width, height=height)
+        new_design = DesignScene(self.mw, name=name, track_width=track_width, tracks=width, height=height)
         new_area = PatternArea(design=new_design)
-        self.mdi_area.addSubWindow(new_area)
+        self.mw.mdi_widget.addSubWindow(new_area)
 
         super(NewWizard, self).accept()
 

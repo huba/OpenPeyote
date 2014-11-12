@@ -15,9 +15,11 @@ from wizards_and_dialogs import *
 
 
 class MainWindow(QMainWindow):
+
     """The main application window."""
     def __init__(self):
         super(MainWindow, self).__init__(None)
+        self.default_bead = BeadType('blank', QBrush(QColor(230, 230, 228)))
 
         self.create_central_widget()
         self.create_menu_bar()
@@ -53,14 +55,14 @@ class MainWindow(QMainWindow):
 
     def create_docked_widgets(self):
         self.catalog = Catalog()
-        self.working_bead = None
+        self.working_bead = self.default_bead
         self.addDockWidget(Qt.LeftDockWidgetArea, self.catalog)
         self.catalog.catalog_tree.currentItemChanged.connect(self.select_type)
 
         # Adding a test collection to the catalog
         new_collection = Collection('Test set')
 
-        new_bead_type = BeadType('Test red')
+        new_bead_type = BeadType('Test red', Qt.red)
         new_collection.addChild(new_bead_type)
 
         new_bead_type = BeadType('Test blue', Qt.blue)
@@ -74,7 +76,7 @@ class MainWindow(QMainWindow):
         the user with creating their design."""
         # TODO: hmmm this generates a weird message, might need to look at that...
         # Also there are some performance problems...
-        wizard = NewWizard(self.mdi_widget)
+        wizard = NewWizard(self)
         wizard.exec_()
 
 

@@ -15,7 +15,7 @@ from util import *
 class DesignScene(QGraphicsScene):
     """This class holds the data for the peyote design, it integrates
     with Qt's GraphicsView framework."""
-    def __init__(self, parent=None, name='(Untitled)', track_width=5, tracks=10, height=40):
+    def __init__(self, main_window, parent=None, name='(Untitled)', track_width=5, tracks=10, height=40):
         """Sets up the neccessary parameters for generating the model, at
         the moment it only generates a blank design."""
         # TODO: add load/save functionality
@@ -30,6 +30,7 @@ class DesignScene(QGraphicsScene):
         self.addItem(self.grid)
 
         self._beads = []
+        self.main_window = main_window
         self.populate()
 
 
@@ -38,7 +39,7 @@ class DesignScene(QGraphicsScene):
         for row in range(0, self.dimensions[HEIGHT]):
             row_list = []
             for col in range(0, self.dimensions[WIDTH]):
-                new_bead = Bead(location=(col, row))
+                new_bead = Bead(self.main_window.default_bead, location=(col, row))
                 row_list.append(new_bead)
                 self.addItem(new_bead)
 
@@ -55,13 +56,14 @@ class Bead(QGraphicsItem):
     track_width = 3
     _default_brush = QBrush(QColor(230, 230, 228))
 
-    def __init__(self, parent=None, location=(0, 0), color=None):
+    def __init__(self, bead_type, parent=None, location=(0, 0), color=None):
         """Standard python __init__ function, should not need too much explaining."""
         super(Bead, self).__init__(parent)
         self.setAcceptedMouseButtons(Qt.LeftButton)
 
         self._location = location
         self._color = color
+        self.bead_type = bead_type
 
         self._calc_pos()
 
@@ -90,24 +92,12 @@ class Bead(QGraphicsItem):
 
     def paint(self, painter, option, widget):
         """A really artsy function... It draws. See QGraphicsItem's documentation for more"""
-        painter.setPen(QColor(170, 170, 168))
-        if self._color:
-            painter.setBrush(self._color)
-
-        else:
-            painter.setBrush(self._default_brush)
-
-        painter.drawRoundedRect(0, 0, self.dimension[WIDTH], self.dimension[HEIGHT], self._rounding, self._rounding)
+        painter.drawPixmap(0, 0, self.bead_type.pixmap)
 
 
     def mousePressEvent(self, evt):
         """Handles mouse events."""
-        # TODO: this is only for testing, implement this with user defined colors...
-        if self._color:
-            self._color = None
-
-        else:
-            self._color = Qt.cyan
+        self.bead_type = self.scene().main_window.working_bead
 
         # Must run update to redraw...
         self.update()
