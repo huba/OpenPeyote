@@ -25,8 +25,7 @@ class DesignScene(QGraphicsScene):
         self.track_width, self.name = track_width, name
         self.dimensions = (tracks * track_width, height)
 
-        Bead.set_track_width(track_width)
-        self.grid = Grid(Bead, self.dimensions)
+        self.grid = Grid(self.track_width, self.dimensions)
         self.addItem(self.grid)
 
         self._beads = []
@@ -39,7 +38,7 @@ class DesignScene(QGraphicsScene):
         for row in range(0, self.dimensions[HEIGHT]):
             row_list = []
             for col in range(0, self.dimensions[WIDTH]):
-                new_bead = Bead(self.main_window.default_bead, location=(col, row))
+                new_bead = Bead(self.track_width, self.main_window.default_bead, location=(col, row))
                 row_list.append(new_bead)
                 self.addItem(new_bead)
 
@@ -53,10 +52,9 @@ class Bead(QGraphicsItem):
     dimension = (28, 40)
     margain = 4
     _rounding = 5
-    track_width = 3
     _default_brush = QBrush(QColor(230, 230, 228))
 
-    def __init__(self, bead_type, parent=None, location=(0, 0), color=None):
+    def __init__(self, track_width, bead_type, parent=None, location=(0, 0), color=None):
         """Standard python __init__ function, should not need too much explaining."""
         super(Bead, self).__init__(parent)
         self.setAcceptedMouseButtons(Qt.LeftButton)
@@ -64,6 +62,7 @@ class Bead(QGraphicsItem):
         self._location = location
         self._color = color
         self.bead_type = bead_type
+        self.track_width = track_width
 
         self._calc_pos()
 
@@ -77,12 +76,6 @@ class Bead(QGraphicsItem):
 
         self.setPos((self._location[X] * (self.dimension[WIDTH] + self.margain)) + self.margain,
                     (self._location[Y] * (self.dimension[HEIGHT] + self.margain)) + self.margain + adjustment)
-
-    @classmethod
-    def set_track_width(cls, new_track_width):
-        """Don't call this once you initialized any instances of the class it will
-        mess things up. Be warned!"""
-        cls.track_width = new_track_width
 
 
     def boundingRect(self):

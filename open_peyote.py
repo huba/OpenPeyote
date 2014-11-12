@@ -83,7 +83,6 @@ class MainWindow(QMainWindow):
     def select_type(self, new_selection, prev_selection):
         """Slot used to select a type of bead."""
         if new_selection.type() == 1001:
-            print('selecting {}'.format(new_selection.data(0, Qt.DisplayRole)))
             self.working_bead = new_selection
 
 
