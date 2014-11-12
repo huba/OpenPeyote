@@ -9,6 +9,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from design_widget import *
+from catalog_widget import *
 from wizards_and_dialogs import *
 
 
@@ -20,9 +21,11 @@ class MainWindow(QMainWindow):
 
         self.create_central_widget()
         self.create_menu_bar()
+        self.create_docked_widgets()
 
 
     def create_central_widget(self):
+        """Sets up the multiple document interface."""
         self.mdi_widget = QMdiArea()
         self.mdi_widget.setViewMode(QMdiArea.TabbedView)
 
@@ -48,6 +51,24 @@ class MainWindow(QMainWindow):
         pass
 
 
+    def create_docked_widgets(self):
+        self.catalog = Catalog()
+        self.working_bead = None
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.catalog)
+        self.catalog.catalog_tree.currentItemChanged.connect(self.select_type)
+
+        # Adding a test collection to the catalog
+        new_collection = Collection('Test set')
+
+        new_bead_type = BeadType('Test red')
+        new_collection.addChild(new_bead_type)
+
+        new_bead_type = BeadType('Test blue', Qt.blue)
+        new_collection.addChild(new_bead_type)
+
+        self.catalog.add_collection(new_collection)
+
+
     def new_design(self):
         """Slot for creating a new design. This function summons Gandalf who will help
         the user with creating their design."""
@@ -55,6 +76,13 @@ class MainWindow(QMainWindow):
         # Also there are some performance problems...
         wizard = NewWizard(self.mdi_widget)
         wizard.exec_()
+
+
+    def select_type(self, new_selection, prev_selection):
+        """Slot used to select a type of bead."""
+        if new_selection.type() == 1001:
+            print('selecting {}'.format(new_selection.data(0, Qt.DisplayRole)))
+            self.working_bead = new_selection
 
 
 
