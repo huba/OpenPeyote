@@ -33,6 +33,7 @@ class NewWizard(QWizard):
         new_design = DesignScene(self.mw, name=name, track_width=track_width, tracks=width, height=height)
         new_area = PatternArea(design=new_design)
         self.mw.mdi_widget.addSubWindow(new_area)
+        new_area.update()
 
         super(NewWizard, self).accept()
 
@@ -52,12 +53,12 @@ class DesignSpecsPage(QWizardPage):
         track_width = QSpinBox()
         track_width.setMaximum(4)
         track_width.setMinimum(1)
-        form.addRow('Track Width:', track_width)
+        form.addRow('Drop Width:', track_width)
         self.registerField('track_width', track_width)
 
         width = QSpinBox()
         width.setMinimum(1)
-        form.addRow('Number of Tracks:', width)
+        form.addRow('Number of Drops:', width)
         self.registerField('width', width)
 
         height = QSpinBox()

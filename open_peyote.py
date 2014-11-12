@@ -8,6 +8,8 @@ Date: 10.11.2014
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+import json
+
 from design_widget import *
 from catalog_widget import *
 from wizards_and_dialogs import *
@@ -23,6 +25,7 @@ class MainWindow(QMainWindow):
 
         self.create_central_widget()
         self.create_menu_bar()
+        self.create_tool_bar()
         self.create_docked_widgets()
 
 
@@ -44,9 +47,29 @@ class MainWindow(QMainWindow):
 
         open_action = file_menu.addAction('Open Design')
         open_action.setShortcuts(QKeySequence.Open)
+        open_action.triggered.connect(self.open_design)
+
+        save_action = file_menu.addAction('Save Design')
+        save_action.setShortcuts(QKeySequence.Save)
+        save_action.triggered.connect(self.save_design)
 
         # the edit menu...
         # TODO: all the menus and etc
+
+
+    def create_tool_bar(self):
+        edit_tool_bar = self.addToolBar('Edit')
+
+        tool_group = QActionGroup(self)
+        tool_group.setExclusive(True)
+
+        self.bead_tool_action = edit_tool_bar.addAction('Bead Tool')
+        self.bead_tool_action.setCheckable(True)
+        tool_group.addAction(self.bead_tool_action)
+
+        self.remove_tool_action = edit_tool_bar.addAction('Clear Tool')
+        self.remove_tool_action.setCheckable(True)
+        tool_group.addAction(self.remove_tool_action)
 
 
     def create_status_bar(self):
@@ -68,6 +91,7 @@ class MainWindow(QMainWindow):
         new_bead_type = BeadType('Test blue', Qt.blue)
         new_collection.addChild(new_bead_type)
 
+
         self.catalog.add_collection(new_collection)
 
 
@@ -78,6 +102,56 @@ class MainWindow(QMainWindow):
         # Also there are some performance problems...
         wizard = NewWizard(self)
         wizard.exec_()
+
+
+    def open_design(self):
+        """Slot that opens a design in a new tab."""
+        extension = '.peyd'
+        (paths, flt) = QFileDialog.getOpenFileNames(parent=self, caption='Open Design',
+                                                  filter='Peyote Design (*{})'.format(extension))
+
+        if flt == '':
+            # it means they clicked cancel...
+            return
+
+        for path in paths:
+            self._open_design(path)
+
+
+    def _open_design(self, path):
+        with open(path, 'r') as file:
+            rdict = json.load(file)
+            info = rdict['__info__']
+            grid = rdict['__beads__']
+
+            design = DesignScene(self,
+                                 rgrid=grid,
+                                 name=info['__name__'],
+                                 track_width=info['__track_width__'],
+                                 tracks=info['__tracks__'],
+                                 height=info['__height__'])
+
+            area = PatternArea(design=design)
+            self.mdi_widget.addSubWindow(area)
+
+
+    def save_design(self):
+        """Slot for saving the design in the active tab."""
+        # TODO: handle no tabs being open, it would be a good idea if
+        # the button was disabled when there are no tabs for example.
+        extension = '.peyd'
+        design = self.mdi_widget.activeSubWindow().widget().scene()
+
+        (path, flt) = QFileDialog.getSaveFileName(self, 'Save Design',
+                                           './{}{}'.format(design.name, extension),
+                                           'Peyote Design (*{})'.format(extension))
+
+        if flt == '':
+            # it means they clicked cancel...
+            return
+
+        with open(path, 'w') as file:
+            json.dump(design.to_dict(), file)
 
 
     def select_type(self, new_selection, prev_selection):

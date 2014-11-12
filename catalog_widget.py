@@ -23,6 +23,9 @@ class Catalog(QDockWidget):
     def current_item(self):
         return self.catalog_tree.currentItem()
 
+    def find_type(self, type_name):
+        return self.catalog_tree.findItems(type_name, Qt.MatchRecursive, 0)
+
 
 class Collection(QTreeWidgetItem):
     def __init__(self, name):
