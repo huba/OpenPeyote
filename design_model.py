@@ -16,11 +16,8 @@ from util import *
 class DesignScene(QGraphicsScene):
     """This class holds the data for the peyote design, it integrates
     with Qt's GraphicsView framework."""
-    def __init__(self, main_window, rgrid=None, parent=None, name='(Untitled)', track_width=5, tracks=10, height=40):
-        """Sets up the neccessary parameters for generating the model, at
-        the moment it only generates a blank design."""
-        # TODO: add load/save functionality
-
+    def __init__(self, main_window, bgrid=None, parent=None, name='(Untitled)', track_width=5, tracks=10, height=40):
+        """Sets up the neccessary parameters for generating the model."""
         super(DesignScene, self).__init__(parent)
 
         self.track_width, self.tracks, self.name = track_width, tracks, name
@@ -32,49 +29,41 @@ class DesignScene(QGraphicsScene):
         self._beads = []
         self.main_window = main_window
 
-        if rgrid:
-            self._load(rgrid)
-
-        else:
-            self._generate()
+        self._generate()
+        if bgrid:
+            self._load(bgrid)
 
 
     def _generate(self):
         """Generates the blank design to the specified dimensions."""
         for row in range(0, self.dimensions[HEIGHT]):
+            row_list = []
             for col in range(0, self.dimensions[WIDTH]):
+                print(col, row)
                 new_bead = Bead(self.track_width, self.main_window.default_bead, location=(col, row))
-                self._beads.append(new_bead)
+                row_list.append(new_bead)
                 self.addItem(new_bead)
 
+            self._beads.append(row_list)
 
-    def _load(self, rgrid):
-        if len(rgrid) != self.dimensions[HEIGHT] * self.dimensions[WIDTH]:
-            # TODO: throw a nasty error
-            return
 
-        for row in range(0, self.dimensions[HEIGHT]):
-            for col in range(0, self.dimensions[WIDTH]):
-                bead_type_str = rgrid[row * col]['__bead_type__']
-                bead_type = self.main_window.catalog.find_type(bead_type_str)
-                if len(bead_type) == 1:
-                    bead_type = bead_type[0]
-
-                else:
-                    bead_type = self.main_window.default_bead
-
-                new_bead = Bead(self.track_width, bead_type, location=(col, row))
-                self._beads.append(new_bead)
-                self.addItem(new_bead)
+    def _load(self, bgrid):
+        """Loads beads from a list"""
+        for bead in bgrid:
+            col, row = bead['__x__'], bead['__y__']
+            bead_type = self.main_window.catalog.find_type(bead['__bead_type__'])
+            self._beads[row][col].set_bead_type(bead_type)
 
 
     def __iter__(self):
+        """2D iter function"""
         for row in range(0, self.dimensions[HEIGHT]):
             for col in range(0, self.dimensions[WIDTH]):
-                yield self._beads[row * col]
+                yield self._beads[row][col]
+
 
     def to_dict(self):
-        # TODO: make it keep the frickin order...
+        """Function builds a dictionary so the object can be serialized with json."""
         rdict = {}
         rdict['__info__'] = {'__name__': self.name,
                              '__track_width__': self.track_width,
@@ -84,7 +73,9 @@ class DesignScene(QGraphicsScene):
         rdict['__beads__'] = []
 
         for bead in self:
-            rdict['__beads__'].append(bead.to_dict())
+            bdict = bead.to_dict()
+            if bdict['__bead_type__'] != 'blank':
+                rdict['__beads__'].append(bdict)
 
         return rdict
 
@@ -109,6 +100,15 @@ class Bead(QGraphicsItem):
         self.track_width = track_width
 
         self._calc_pos()
+
+
+    def set_bead_type(self, new_bead_type):
+        """Sets the bead type if it's known, otherwise it resets to default."""
+        if new_bead_type:
+            self.bead_type = new_bead_type
+
+        else:
+            self.bead_type = self.scene().main_window.default_bead
 
     def _calc_pos(self):
         """Sets up the bead's pxel coordinates relative to the scene."""
@@ -144,5 +144,7 @@ class Bead(QGraphicsItem):
         self.update()
 
     def to_dict(self):
-        rdict = {'__bead_type__': self.bead_type.data(0, Qt.DisplayRole)}
+        """For json serialization."""
+        rdict = {'__bead_type__': self.bead_type.data(0, Qt.DisplayRole),
+                 '__x__': self._location[COL], '__y__': self._location[ROW]}
         return rdict

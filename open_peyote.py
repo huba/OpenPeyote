@@ -125,7 +125,7 @@ class MainWindow(QMainWindow):
             grid = rdict['__beads__']
 
             design = DesignScene(self,
-                                 rgrid=grid,
+                                 bgrid=grid,
                                  name=info['__name__'],
                                  track_width=info['__track_width__'],
                                  tracks=info['__tracks__'],
