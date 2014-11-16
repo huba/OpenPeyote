@@ -85,8 +85,9 @@ class Catalog(QTreeWidget):
 
     def export_collection(self):
         collection = self.currentItem()
+        name_s = '_'.join(collection.data(0,  Qt.DisplayRole).lower().split(' '))
         (path, flt) = QFileDialog.getSaveFileName(self, 'Export Collection',
-                                                  './{}{}'.format(collection.data(0,  Qt.DisplayRole), collection_extension),
+                                                  './{}{}'.format(name_s, collection_extension),
                                                   'Bead Collection (*{})'.format(collection_extension))
 
         if flt == '':

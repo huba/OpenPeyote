@@ -158,8 +158,9 @@ class MainWindow(QMainWindow):
         design = self.mdi_widget.activeSubWindow().widget().scene()
 
         if not self.mdi_widget.activeSubWindow().widget().filepath:
+            name_s = '_'.join(design.name.lower().split(' '))
             (path, flt) = QFileDialog.getSaveFileName(self, 'Save Design',
-                                               './{}{}'.format(design.name, design_extension),
+                                               './{}{}'.format(name_s, design_extension),
                                                'Peyote Design (*{})'.format(design_extension))
 
             if flt == '':
@@ -178,8 +179,9 @@ class MainWindow(QMainWindow):
     def save_as(self):
         """Save and force the user to select a new path"""
         design = self.mdi_widget.activeSubWindow().widget().scene()
+        name_s = name_s = '_'.join(design.name.lower().split(' '))
         (path, flt) = QFileDialog.getSaveFileName(self, 'Save Design',
-                                                  './{}{}'.format(design.name, design_extension),
+                                                  './{}{}'.format(name_s, design_extension),
                                                   'Peyote Design (*{})'.format(design_extension))
 
         if flt == '':
