@@ -47,7 +47,7 @@ class DesignSpecsPage(QWizardPage):
         super(DesignSpecsPage, self).__init__(parent)
         self.setTitle('New Design Specifications')
 
-    def initializePage():
+    def initializePage(self):
         form = QFormLayout()
 
         design_name = QLineEdit()
@@ -97,7 +97,7 @@ class CollectionSpecsPage(QWizardPage):
         super(CollectionSpecsPage, self).__init__(parent)
         self.setTitle('Specifications of New Bead Collection')
 
-    def initializePage():
+    def initializePage(self):
         form = QFormLayout()
 
         collection_name = QLineEdit()
@@ -109,6 +109,8 @@ class CollectionSpecsPage(QWizardPage):
 
 
 class BeadWizard(QWizard):
+    """This one creates new types of beads and adds them to a collection.
+    I also keep misreading it as 'beard wizard'..."""
     def __init__(self, collection, parent=None):
         super(BeadWizard, self).__init__(parent)
         self.setWindowTitle('Creating a New Bead Type')
@@ -124,8 +126,14 @@ class BeadWizard(QWizard):
         brush = self.field('bead_brush')
         base_color = self.field('base_color')
         highlight_color = self.field('highlight_color')
+        texture = self.field('texture')
 
-        new_bead_type = catalog_widget.BeadType(name, brush)
+        new_bead_type = catalog_widget.BeadType(name,
+                                                catalog_number,
+                                                brush,
+                                                base_color,
+                                                highlight_color,
+                                                texture)
         self.collection.addChild(new_bead_type)
         super(BeadWizard, self).accept()
 
@@ -193,6 +201,7 @@ class BeadAppearancePage(QWizardPage):
         demo_bead = DemoBead(base_color, highlight_color, shiny_box)
         shiny_box.toggled.connect(demo_bead.texture_change)
         self.registerField('bead_brush', demo_bead, property='brush')
+        self.registerField('texture', demo_bead, property='texture')
         hbox_b.addWidget(demo_bead)
 
         bottom_w = QWidget()
@@ -207,11 +216,11 @@ class ColorButton(QPushButton):
     def __init__(self, selected_color, parent=None):
         super(ColorButton, self).__init__(parent)
         self.selected_color, self.demo_bead = selected_color, None
-        self._color_string = self.self.selected_color.name()
+        self._color_string = self.selected_color.name()
         self.setStyleSheet('background-color:{}'.format(self._color_string))
 
 
-    @pyqtProperty(QString)
+    @pyqtProperty(str)
     def color_string(self):
         return self._color_string
 
@@ -225,7 +234,7 @@ class ColorButton(QPushButton):
         if color_dialog.exec_() == 1:
             # Only change the selected color if they click OK
             self.selected_color = color_dialog.currentColor()
-            self._color_string = self.self.selected_color.name()
+            self._color_string = self.selected_color.name()
             self.setStyleSheet('background-color:{}'.format(self._color_string))
 
             if self.demo_bead:
@@ -239,6 +248,7 @@ class DemoBead(QGraphicsView):
     def __init__(self, base_button, highlight_button, shiny, parent=None):
         super(DemoBead, self).__init__(parent)
         self._brush = QBrush(Qt.red)
+        self._texture = MATTE
         self.setScene(QGraphicsScene())
         self.setBackgroundBrush(QBrush(QColor(190, 189, 184)))
 
@@ -261,26 +271,29 @@ class DemoBead(QGraphicsView):
     def brush(self, new_brush):
         self._brush = new_brush
 
+    @pyqtProperty(int)
+    def texture(self):
+        return self._texture
+
+    @texture.setter
+    def texture(self, new_texture):
+        self._texture = new_texture
+
     def texture_change(self, state):
+        if state:
+            self.texture = POLISHED
+
+        else:
+            self.texture = MATTE
+
         self.set_pixmap()
 
 
     def set_pixmap(self):
         """Updates the selected brush and sets the drawn pixmap."""
-        if self.shiny.isChecked():
-            # Creates gradient brush to mimic a shiny surface
-            gradient = QLinearGradient(QPointF(14, 0), QPointF(14, 40))
-            gradient.setColorAt(0, self.highlight_button.selected_color),
-            gradient.setColorAt(0.2, self.highlight_button.selected_color)
-            gradient.setColorAt(0.5, self.base_button.selected_color)
-            self._brush = QBrush(gradient)
-
-        else:
-            # Create gradient to mimic matte surface
-            gradient = QLinearGradient(QPointF(14, -30), QPointF(14, 60))
-            gradient.setColorAt(0, self.highlight_button.selected_color)
-            gradient.setColorAt(1, self.base_button.selected_color)
-            self._brush = QBrush(gradient)
+        self.brush = brush_factory(self.base_button.selected_color,
+                                   self.highlight_button.selected_color,
+                                   self.texture)
 
         # Prepares the pixmap surface
         pixmap = QPixmap(28, 40)

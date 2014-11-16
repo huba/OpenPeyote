@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         """Init function for the main application."""
         super(MainWindow, self).__init__(None)
-        self.default_bead = BeadType('blank', QBrush(QColor(230, 230, 228)))
+        self.default_bead = BeadType('blank', 'n/a', QBrush(QColor(230, 230, 228)), '#000000', '#000000', 10)
 
         # Calls the functions to prepare each area of the main window
         self.create_central_widget()
@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
         """Adds the docked widget."""
         self.catalog = Catalog()
         self.working_bead = self.default_bead
-        
+
         catalog_dock = QDockWidget()
         catalog_dock.setWidget(self.catalog)
         catalog_dock.setFeatures(QDockWidget.DockWidgetVerticalTitleBar)
@@ -99,16 +99,16 @@ class MainWindow(QMainWindow):
         self.catalog.currentItemChanged.connect(self.select_type)
 
         # Adding a test collection to the catalog
-        new_collection = Collection('Test set')
-
-        new_bead_type = BeadType('Test red', Qt.red)
-        new_collection.addChild(new_bead_type)
-
-        new_bead_type = BeadType('Test blue', Qt.blue)
-        new_collection.addChild(new_bead_type)
-
-
-        self.catalog.add_collection(new_collection)
+        # new_collection = Collection('Test set')
+        #
+        # new_bead_type = BeadType('Test red', Qt.red)
+        # new_collection.addChild(new_bead_type)
+        #
+        # new_bead_type = BeadType('Test blue', Qt.blue)
+        # new_collection.addChild(new_bead_type)
+        #
+        #
+        # self.catalog.add_collection(new_collection)
 
 
     def new_design(self):
