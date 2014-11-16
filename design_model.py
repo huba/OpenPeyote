@@ -47,9 +47,11 @@ class DesignScene(QGraphicsScene):
 
 
     def _load(self, bgrid):
-        """Loads beads from a list"""
+        """Loads beads from a list writing them over the blank design."""
         for bead in bgrid:
             col, row = bead['__x__'], bead['__y__']
+            # TODO: add a new part to the save file that stores the ids of the required beads
+            # and prompts the user at load time if any are not found
             bead_type = self.main_window.catalog.find_type(bead['__bead_type__'])
             self._beads[row][col].set_bead_type(bead_type)
 

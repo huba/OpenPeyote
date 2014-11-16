@@ -3,34 +3,83 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from util import *
+from wizards_and_dialogs import *
 
 
 
-class Catalog(QDockWidget):
+class Catalog(QTreeWidget):
     def __init__(self, parent=None):
         super(Catalog, self).__init__(parent)
-        self.setFeatures(QDockWidget.DockWidgetVerticalTitleBar)
         self.setWindowTitle('Catalog')
 
-        self.catalog_tree = QTreeWidget()
-        self.catalog_tree.setColumnCount(1)
-        self.catalog_tree.setHeaderLabel('Name')
-        self.setWidget(self.catalog_tree)
+        self.setColumnCount(1)
+        self.setHeaderLabel('Name')
 
     def add_collection(self, collection):
-        self.catalog_tree.addTopLevelItem(collection)
+        self.addTopLevelItem(collection)
 
     def current_item(self):
-        return self.catalog_tree.currentItem()
+        return self.currentItem()
 
     def find_type(self, type_name):
         try:
             # Return the first match
-            return self.catalog_tree.findItems(type_name, Qt.MatchRecursive, 0)[0]
+            return self.findItems(type_name, Qt.MatchRecursive, 0)[0]
 
         except IndexError:
             # Found nothing
             return None
+
+    def contextMenuEvent(self, evt):
+        """Creates and shows a context menu."""
+
+        if self.itemAt(evt.pos()):
+            self._collection_context(evt)
+
+        else:
+            self._root_context(evt)
+
+        evt.accept()
+
+    def _collection_context(self, evt):
+        if self.itemAt(evt.pos()).type() != 1000:
+            return
+
+        popup = QMenu()
+
+        new_bead_action = popup.addAction('Add New Bead')
+        new_bead_action.triggered.connect(self.add_bead_slot)
+
+        export_collection_action = popup.addAction('Export Collection')
+        # etc
+
+        popup.exec_(evt.globalPos())
+
+
+    def _root_context(self, evt):
+        popup = QMenu()
+
+        new_collection_action = popup.addAction('Add New Collection')
+        new_collection_action.triggered.connect(self.add_collection_slot)
+
+        import_collection_action = popup.addAction('Import Collection')
+        # etc
+
+        popup.exec_(evt.globalPos())
+
+
+    def add_collection_slot(self):
+        """Slot for calling a nw collection wizard."""
+        wizard = CollectionWizard(self)
+        wizard.exec_()
+
+
+    def add_bead_slot(self):
+        """Slot for calling a new bead wizard."""
+        # Assume that the right clicked item is a collection.
+        wizard = BeadWizard(self.currentItem())
+        wizard.exec_()
+
 
 
 class Collection(QTreeWidgetItem):
@@ -63,7 +112,6 @@ class BeadType(QTreeWidgetItem):
 
         # paint the icon...
         bead_painter.begin(self.pixmap)
-
 
         bead_painter.setPen(QColor(170, 170, 168))
         bead_painter.setBrush(brush)

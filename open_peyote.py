@@ -18,12 +18,13 @@ from util import *
 
 
 class MainWindow(QMainWindow):
-
     """The main application window."""
     def __init__(self):
+        """Init function for the main application."""
         super(MainWindow, self).__init__(None)
         self.default_bead = BeadType('blank', QBrush(QColor(230, 230, 228)))
 
+        # Calls the functions to prepare each area of the main window
         self.create_central_widget()
         self.create_menu_bar()
         self.create_tool_bar()
@@ -39,6 +40,7 @@ class MainWindow(QMainWindow):
 
 
     def create_menu_bar(self):
+        """Adds all the menus and actions to the menu bar."""
         # the file menu...
         file_menu = self.menuBar().addMenu('File')
 
@@ -64,6 +66,7 @@ class MainWindow(QMainWindow):
 
 
     def create_tool_bar(self):
+        """Adds the tools to the toolbar."""
         edit_tool_bar = self.addToolBar('Edit')
 
         tool_group = QActionGroup(self)
@@ -79,14 +82,21 @@ class MainWindow(QMainWindow):
 
 
     def create_status_bar(self):
+        """Prepares the status bar"""
         pass
 
 
     def create_docked_widgets(self):
+        """Adds the docked widget."""
         self.catalog = Catalog()
         self.working_bead = self.default_bead
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.catalog)
-        self.catalog.catalog_tree.currentItemChanged.connect(self.select_type)
+        
+        catalog_dock = QDockWidget()
+        catalog_dock.setWidget(self.catalog)
+        catalog_dock.setFeatures(QDockWidget.DockWidgetVerticalTitleBar)
+        catalog_dock.setWindowTitle('Catalog')
+        self.addDockWidget(Qt.LeftDockWidgetArea, catalog_dock)
+        self.catalog.currentItemChanged.connect(self.select_type)
 
         # Adding a test collection to the catalog
         new_collection = Collection('Test set')
@@ -111,10 +121,9 @@ class MainWindow(QMainWindow):
 
 
     def open_design(self):
-        """Slot that opens a design in a new tab."""
-        extension = '.peyd'
+        """Slot that opens (a) design(s) in a new tab."""
         (paths, flt) = QFileDialog.getOpenFileNames(parent=self, caption='Open Design',
-                                                  filter='Peyote Design (*{})'.format(extension))
+                                                  filter='Peyote Design (*{})'.format(design_extension))
 
         if flt == '':
             # it means they clicked cancel...
@@ -165,6 +174,7 @@ class MainWindow(QMainWindow):
         with open(path, 'w') as file:
             json.dump(design.to_dict(), file)
 
+
     def save_as(self):
         """Save and force the user to select a new path"""
         design = self.mdi_widget.activeSubWindow().widget().scene()
@@ -196,7 +206,5 @@ if __name__ == '__main__':
     mw = MainWindow()
     mw.create()
     mw.showMaximized()
-    # pattern_area = PatternArea()
-    # pattern_area.show()
 
     sys.exit(app.exec_())
