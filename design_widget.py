@@ -23,6 +23,7 @@ class PatternArea(QGraphicsView):
         self._zoom = 1
         self._panning = False
         self._previous_pos = None
+        self.filepath = None
 
         if not design:
             design = DesignScene(self)

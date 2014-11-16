@@ -13,6 +13,7 @@ import json
 from design_widget import *
 from catalog_widget import *
 from wizards_and_dialogs import *
+from util import *
 
 
 
@@ -52,6 +53,11 @@ class MainWindow(QMainWindow):
         save_action = file_menu.addAction('Save Design')
         save_action.setShortcuts(QKeySequence.Save)
         save_action.triggered.connect(self.save_design)
+
+        save_as_action = file_menu.addAction('Save Design As')
+        # TODO: look into why QKeySequence.SaveAs is not recognized in pyqt5
+        # save_as_action.setShortcuts(QKeySequence.SaveAs)
+        save_as_action.triggered.connect(self.save_as)
 
         # the edit menu...
         # TODO: all the menus and etc
@@ -132,6 +138,7 @@ class MainWindow(QMainWindow):
                                  height=info['__height__'])
 
             area = PatternArea(design=design)
+            area.filepath = path
             self.mdi_widget.addSubWindow(area)
 
 
@@ -139,16 +146,37 @@ class MainWindow(QMainWindow):
         """Slot for saving the design in the active tab."""
         # TODO: handle no tabs being open, it would be a good idea if
         # the button was disabled when there are no tabs for example.
-        extension = '.peyd'
         design = self.mdi_widget.activeSubWindow().widget().scene()
 
+        if not self.mdi_widget.activeSubWindow().widget().filepath:
+            (path, flt) = QFileDialog.getSaveFileName(self, 'Save Design',
+                                               './{}{}'.format(design.name, design_extension),
+                                               'Peyote Design (*{})'.format(design_extension))
+
+            if flt == '':
+                # it means they clicked cancel...
+                return
+
+            self.mdi_widget.activeSubWindow().widget().filepath = path
+
+        else:
+            path = self.mdi_widget.activeSubWindow().widget().filepath
+
+        with open(path, 'w') as file:
+            json.dump(design.to_dict(), file)
+
+    def save_as(self):
+        """Save and force the user to select a new path"""
+        design = self.mdi_widget.activeSubWindow().widget().scene()
         (path, flt) = QFileDialog.getSaveFileName(self, 'Save Design',
-                                           './{}{}'.format(design.name, extension),
-                                           'Peyote Design (*{})'.format(extension))
+                                                  './{}{}'.format(design.name, design_extension),
+                                                  'Peyote Design (*{})'.format(design_extension))
 
         if flt == '':
             # it means they clicked cancel...
             return
+
+        self.mdi_widget.activeSubWindow().widget().filepath = path
 
         with open(path, 'w') as file:
             json.dump(design.to_dict(), file)

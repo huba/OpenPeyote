@@ -39,7 +39,6 @@ class DesignScene(QGraphicsScene):
         for row in range(0, self.dimensions[HEIGHT]):
             row_list = []
             for col in range(0, self.dimensions[WIDTH]):
-                print(col, row)
                 new_bead = Bead(self.track_width, self.main_window.default_bead, location=(col, row))
                 row_list.append(new_bead)
                 self.addItem(new_bead)
