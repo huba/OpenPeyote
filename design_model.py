@@ -146,6 +146,6 @@ class Bead(QGraphicsItem):
 
     def to_dict(self):
         """For json serialization."""
-        rdict = {'__bead_type__': self.bead_type.data(0, Qt.DisplayRole),
+        rdict = {'__bead_type__': self.bead_type.data(1, Qt.DisplayRole),
                  '__x__': self._location[COL], '__y__': self._location[ROW]}
         return rdict
