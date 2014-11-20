@@ -94,6 +94,7 @@ class Bead(QGraphicsItem):
         """Standard python __init__ function, should not need too much explaining."""
         super(Bead, self).__init__(parent)
         self.setAcceptedMouseButtons(Qt.LeftButton)
+        self.setAcceptHoverEvents(True)
 
         self._location = location
         self._color = color
@@ -110,6 +111,7 @@ class Bead(QGraphicsItem):
 
         else:
             self.bead_type = self.scene().main_window.default_bead
+
 
     def _calc_pos(self):
         """Sets up the bead's pxel coordinates relative to the scene."""
@@ -143,6 +145,18 @@ class Bead(QGraphicsItem):
 
         # Must run update to redraw...
         self.update()
+
+
+    def hoverEnterEvent(self, evt):
+        row = self._location[ROW] + 1
+        col = self._location[COL] + 1
+        b_type = self.bead_type.data(1, Qt.DisplayRole)
+        self.scene().main_window.statusBar().showMessage('row: {0} column: {1} type: {2}'.format(row, col, b_type))
+
+
+    def hoverLeaveEvent(self, evt):
+        self.scene().main_window.statusBar().clearMessage()
+
 
     def to_dict(self):
         """For json serialization."""

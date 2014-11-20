@@ -23,10 +23,10 @@ class Catalog(QTreeWidget):
     def current_item(self):
         return self.currentItem()
 
-    def find_type(self, type_name):
+    def find_type(self, type_catalog_id):
         try:
             # Return the first match
-            return self.findItems(type_name, Qt.MatchRecursive, 1)[0]
+            return self.findItems(type_catalog_id, Qt.MatchRecursive, 1)[0]
 
         except IndexError:
             # Found nothing

@@ -26,8 +26,8 @@ class Grid(QGraphicsItem):
         """QGraphicsItem's required bounding rect function, used for culling offscreen geometry
         and similar magical things."""
         return QRectF(-30, -30,
-                      (self.pixel_dimensions[WIDTH] + self.margain) * self.dimension[WIDTH] + 30,
-                      (self.pixel_dimensions[HEIGHT] + self.margain) * self.dimension[HEIGHT] + 30)
+                      (self.pixel_dimensions[WIDTH] + self.margain) * self.dimension[WIDTH] + 60,
+                      (self.pixel_dimensions[HEIGHT] + self.margain) * self.dimension[HEIGHT] + 60)
 
     def paint(self, painter, option, widget):
         """Overloading the paint function of QGraphicsItem all the drawing is done here."""

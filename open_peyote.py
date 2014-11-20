@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         self.create_menu_bar()
         self.create_tool_bar()
         self.create_docked_widgets()
+        self.create_status_bar()
 
 
     def create_central_widget(self):
@@ -83,7 +84,8 @@ class MainWindow(QMainWindow):
 
     def create_status_bar(self):
         """Prepares the status bar"""
-        pass
+        self.setStatusBar(QStatusBar(self))
+        self.statusBar().showMessage('Test', 2000)
 
 
     def create_docked_widgets(self):
@@ -97,18 +99,6 @@ class MainWindow(QMainWindow):
         catalog_dock.setWindowTitle('Catalog')
         self.addDockWidget(Qt.LeftDockWidgetArea, catalog_dock)
         self.catalog.currentItemChanged.connect(self.select_type)
-
-        # Adding a test collection to the catalog
-        # new_collection = Collection('Test set')
-        #
-        # new_bead_type = BeadType('Test red', Qt.red)
-        # new_collection.addChild(new_bead_type)
-        #
-        # new_bead_type = BeadType('Test blue', Qt.blue)
-        # new_collection.addChild(new_bead_type)
-        #
-        #
-        # self.catalog.add_collection(new_collection)
 
 
     def new_design(self):
